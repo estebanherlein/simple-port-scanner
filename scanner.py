@@ -18,12 +18,20 @@ except KeyboardInterrupt:
 
 
 def scan_host(targetport):
+    try:
         s = socket(AF_INET, SOCK_STREAM)
         s.settimeout(timeout)
         result = s.connect_ex((hostip, targetport))
         if result == 0:
+            response = s.recv(1024)
             print("[*] Port %d seems open" % targetport)
+            try:
+                print(response.decode('utf-8', 'ignore'))
+            except:
+                pass
         s.close()
+    except:
+        print("Something went wrong when scouting port %d" % targetport)
 
 
 print("\n[*] Host %s IP: %s" % (host, hostip))
