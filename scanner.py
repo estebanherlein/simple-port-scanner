@@ -2,39 +2,40 @@ from socket import *
 import sys
 import time
 from datetime import datetime
+from threading import Thread
 
-
-def scan_host(targethost, targetport, r_code=1):
-    try:
-        s = socket(AF_INET, SOCK_STREAM)
-        code = s.connect_ex((targethost, targetport))
-        if code == 0:
-            r_code = code
-        s.close()
-    finally:
-        return r_code
-
+threads = []
+timeout = 5
 
 try:
     host = input("[*] Enter target Host address: ")
+    hostip = gethostbyname(host)
     min_port = int(input("Enter starting port: "))
     max_port = int(input("Enter ending port: "))
 except KeyboardInterrupt:
     print("\n\n[*] User requested interruption")
     sys.exit(1)
 
-hostip = gethostbyname(host)
+
+def scan_host(targetport):
+        s = socket(AF_INET, SOCK_STREAM)
+        s.settimeout(timeout)
+        result = s.connect_ex((hostip, targetport))
+        if result == 0:
+            print("[*] Port %d seems open" % targetport)
+        s.close()
+
+
 print("\n[*] Host %s IP: %s" % (host, hostip))
 print("[*] Scan started at %s \n" % (time.strftime("%H:%M:%S")))
 start_time = datetime.now()
 
-for port in range(min_port, max_port):
-    try:
-        response = scan_host(hostip, port)
-        if response == 0:
-            print("[*] Port %d seems open" % port)
-    except:
-        pass
+for i in range(min_port, max_port+1):
+    thread = Thread(target=scan_host, args=(i,))
+    threads.append(thread)
+    thread.start()
+
+[x.join() for x in threads]
 
 
 stop_time = datetime.now()
