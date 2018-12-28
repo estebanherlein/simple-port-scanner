@@ -31,7 +31,8 @@ def scan_host(targetport):
                 pass
         s.close()
     except:
-        print("Something went wrong when scouting port %d" % targetport)
+        #print("Something went wrong while scouting port %d" % targetport)
+        pass
 
 
 print("\n[*] Host %s IP: %s" % (host, hostip))
